@@ -19,7 +19,7 @@ With Verilator 5, a C++ compiler and Make, run `make test`. This elaborates the 
 
 ## Scope of validation
 
-The supplied course folder contains the detector and a handwritten SDC targeting 20 ns. The local RTL had a procedural loop indexed by a genvar; the repository changes that index to a local integer so it elaborates. The detector still contains width, incomplete-case and combinational-loop warnings, and early hard-wired candidate calculations differ from the general MCU formula. Top-level valid/data alignment and detector decisions require an end-to-end RTL vector bench before using this snapshot for BER, latency, timing closure, or throughput claims. Lint and metric tests establish a narrower result.
+The supplied course folder contains the detector and a handwritten SDC targeting 20 ns. The local RTL had a procedural loop indexed by a genvar; the repository changes that index to a local integer so it elaborates. The detector still contains width, incomplete-case and combinational-loop warnings, and early hard-wired candidate calculations differ from the general MCU formula. A top-level characterization is available through `make characterize`. It loads an identity channel and repeatedly drives the noiseless vector [3, −1, 1, −3, 3, −1]. On Verilator 5.052 the expected output was 0x792 and the observed settled output was 0x781 after 150 observation clocks, 129 of which were valid. `make characterize ARGS=+strict` treats this known mismatch as a failing test. The original course design is preserved apart from the procedural-loop syntax fix; this snapshot has not passed an end-to-end accuracy regression.
 
 ## Files
 

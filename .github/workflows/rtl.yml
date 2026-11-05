@@ -1,0 +1,14 @@
+name: Verify RTL
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install simulator
+        run: sudo apt-get update -qq && sudo apt-get install -y verilator
+      - name: Run regression
+        run: make test && node --test tests/search.test.mjs
