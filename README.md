@@ -15,7 +15,7 @@ A 3 × 3 complex system becomes six real coordinates: three real components foll
 
 ## Reproduce
 
-With Verilator 5, a C++ compiler and Make, run `make test`. This elaborates the complete top and exercises the MCU for 60 signed residual/constellation combinations. In MATLAB, run `cd model; example` to recover a known transmitted vector from a triangular channel. The MATLAB algorithmic reference was written for this package, independently of the RTL. It uses floating-point arithmetic and direct beam expansion.
+With Verilator 5.052, a C++ compiler and Make, run `make test`. This elaborates the complete top and exercises the MCU for 60 signed residual/constellation combinations. In MATLAB, run `cd model; example` to recover a known transmitted vector from a triangular channel. The MATLAB algorithmic reference was written for this package, independently of the RTL. It uses floating-point arithmetic and direct beam expansion.
 
 ## Scope of validation
 

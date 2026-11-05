@@ -5,10 +5,14 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Install simulator
-        run: sudo apt-get update -qq && sudo apt-get install -y verilator
-      - name: Run regression
-        run: make test && node --test tests/search.test.mjs
+      - name: Check survivor search and residual costs
+        run: node --test tests/search.test.mjs
+      - name: Elaborate detector, verify MCU and characterize the complete RTL
+        # Official Verilator 5.052 image. Older distribution builds do not
+        # elaborate these multidimensional register-array assignments.
+        run: |
+          docker run --rm --volume "$PWD:/repo" --workdir /repo --entrypoint make \
+            verilator/verilator@sha256:a5b73e2fce0b2c483396f3800940f33b6faa802331a061c21694dd27b7352120 test characterize
