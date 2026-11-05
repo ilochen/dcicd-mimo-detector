@@ -1,5 +1,4 @@
-// Characterize the supplied top against a simple noiseless channel.
-// Set +strict to fail if the settled decision differs from the transmitted word.
+// Noiseless identity-channel regression; +archive checks the preserved historical failure.
 module diagonal_tb;
   logic clk=0, rst=0, flagChannelorData=0, i_valid=0;
   logic [95:0] InData;
@@ -28,7 +27,11 @@ module diagonal_tb;
     end
     if(got==0) $fatal(1,"No output-valid indication");
     $display("TOP DIAGONAL: expected=%03h observed=%03h valid_cycles=%0d",expected,OutData,got);
-    if($test$plusargs("strict") && OutData!==expected) $fatal(1,"Detector decision mismatch");
+    if ($test$plusargs("archive")) begin
+      if (OutData !== 12'h781 || got != 129) $fatal(1,"Archival behavior changed");
+    end else if (OutData !== expected || got != 144) begin
+      $fatal(1,"Detector decision or output-valid mismatch");
+    end
     $finish;
   end
 endmodule

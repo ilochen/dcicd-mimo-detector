@@ -1,9 +1,26 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fafbfc"><title>K-best MIMO detector · Ilo Chen</title><link rel="stylesheet" href="./style.css"></head><body>
-<header><a href="https://ilochen.github.io/">ilo@chen_</a><a href="https://github.com/ilochen/dcicd-mimo-detector">GitHub source ↗</a></header>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#fafbfc"><title>K-best MIMO detector · Ilo Chen</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header><a href="https://ilochen.github.io/projects/dcicd-mimo-detector/">← Project</a><a href="https://github.com/ilochen/dcicd-mimo-detector">GitHub source ↗</a></header>
 <main><p class="kicker">Digital communications IC design</p><h1>K-best MIMO detector</h1>
-<p class="lead">A 3 × 3 receiver estimates three 16-QAM symbols from six real coordinates. Working backwards through an upper triangular channel matrix, the detector ranks candidate paths by accumulated absolute residual and carries a different number of survivors into each layer.</p>
+<p class="lead">A 3 × 3 receiver estimates three complex 16-QAM symbols from six real coordinates. Each registered layer of the detector extends the surviving symbol paths by one coordinate and ranks them by accumulated absolute residual.</p>
 <section><h2>Search one observation</h2>
-<div class="controls"><label>Observation <select id="noise"><option value="0">Noiseless</option><option value="1">Perturbed</option></select></label><button id="prev">← Previous layer</button><button id="next">Next layer →</button><output id="progress"></output></div>
-<div id="stages" aria-label="Search layers"></div><div class="panels"><article><h3>Channel and observation</h3><div id="matrix"></div></article><article><h3>Survivors by accumulated cost</h3><div id="survivors"></div></article></div><p id="status" aria-live="polite"></p></section>
-<section><h2>Hardware mapping</h2><p>Four valid beats load the 21 coefficients of R using a six-word input bus. Each observation then supplies six z coordinates. The history unit subtracts contributions from coordinates already selected. A metric unit adds |history − Rᵢᵢsᵢ| to each path cost. Compare-and-select logic forwards the surviving costs and coordinate histories, while register chains align the observation with the active layer.</p><p>The final vector contains three real coordinates followed by their three imaginary counterparts. The output mapper packs the detected symbols into three four-bit fields.</p></section>
-<p class="note">This walkthrough evaluates the search in real-valued arithmetic. The repository includes the SystemVerilog design, a MATLAB reference, timing constraints, and an RTL metric-unit test. In the archived RTL, one noiseless identity-channel case produces 0x781 for a transmitted 0x792. The repository documents this discrepancy and includes the reproducible top-level bench.</p></main><script type="module" src="demo.mjs"></script></body></html>
+<div class="controls">
+<label>Channel <select id="channel"><option value="identity">Identity</option><option value="coupled">Coupled upper triangle</option></select></label>
+<label>Observation <select id="noise"><option value="noiseless">Noiseless</option><option value="perturbed">Perturbed</option><option value="zero">Zero · equal-cost ties</option></select></label>
+<button id="prev">← Previous layer</button><button id="next">Next layer →</button><output id="progress"></output>
+</div>
+<div id="stages" aria-label="Search layers"></div>
+<div class="panels"><article><h3>Channel and observation</h3><div id="matrix"></div></article><article><h3>Survivors by accumulated cost</h3><div id="survivors"></div></article></div>
+<p id="status" aria-live="polite"></p></section>
+<section><h2>Hardware mapping</h2>
+<p>Four valid channel beats load the 21 upper-triangular coefficients of R, six signed 16-bit words per beat. The final three fields are padding. The fourth accepted channel beat commits the complete matrix. An accepted observation carries six signed 16-bit coordinates of z and keeps a snapshot of that matrix through the pipeline. R has twelve fractional bits and z has ten. Shifting each z word left by two aligns the binary points before the metric calculation.</p>
+<p>At row <i>i</i>, a candidate adds |zᵢ − ∑ⱼ₌ᵢ⁶ Rᵢⱼsⱼ| to its parent’s cost. Equal costs retain parent rank first and amplitude order +3, +1, −1, −3 second. A bitonic comparator network ranks the children at each layer. The winner carries all six amplitudes. Each output nibble combines the real and imaginary amplitudes of one stream, with stream 1 in the most significant nibble.</p>
+<p>The interface accepts successive observations on successive clocks. The decision and its valid bit emerge six clocks after acceptance. A gap in the input valid signal becomes a corresponding gap at the output. These are RTL cycle counts; physical frequency and area require synthesis.</p>
+<p>The identity-channel regression uses the transmitted vector [3, −1, 1, −3, 3, −1]. Step to layer 6 to inspect its packed decision word, <code>0x792</code>. The browser computes reference decisions from quantized inputs. The source repository contains the SystemVerilog datapath, MATLAB models, and RTL regression benches.</p></section>
+</main><script type="module" src="./demo.mjs"></script></body></html>

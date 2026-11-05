@@ -1,18 +1,25 @@
-name: Verify RTL
+name: Verify detector
 on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Check survivor search and residual costs
-        run: node --test tests/search.test.mjs
-      - name: Elaborate detector, verify MCU and characterize the complete RTL
-        # Official Verilator 5.052 image. Older distribution builds do not
-        # elaborate these multidimensional register-array assignments.
+      - name: Verify the Pages reference
+        run: make web-test
+      - name: Install GNU Octave
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends octave
+      - name: Run the MATLAB model and export RTL vectors
+        run: make model-test && test -s build/matlab-vectors.txt
+      - name: Check RTL against Python and MATLAB-generated decisions
         run: |
           docker run --rm --volume "$PWD:/repo" --workdir /repo --entrypoint make \
-            verilator/verilator@sha256:a5b73e2fce0b2c483396f3800940f33b6faa802331a061c21694dd27b7352120 test characterize
+            verilator/verilator@sha256:a5b73e2fce0b2c483396f3800940f33b6faa802331a061c21694dd27b7352120 rtl-test
+      - name: Save generated MATLAB vectors
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-detector-vectors
+          path: build/matlab-vectors.txt
