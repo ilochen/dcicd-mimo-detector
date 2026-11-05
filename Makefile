@@ -21,13 +21,14 @@ characterize:
 
 stream-test:
 	mkdir -p build/stream
-	$(PYTHON) tests/stream_vectors.py build/stream.txt $(if $(wildcard build/matlab-vectors.txt),--matlab build/matlab-vectors.txt)
+	$(PYTHON) tests/stream_vectors.py build/stream.txt --matlab $(or $(wildcard build/matlab-vectors.txt),model/fixtures/vectors.txt)
 	$(VERILATOR) $(VFLAGS) --Mdir build/stream --top-module stream_tb $(RTL) tests/stream_tb.sv
 	./build/stream/Vstream_tb +vectors=build/stream.txt
 
 model-test:
 	mkdir -p build
 	$(OCTAVE) --no-gui --quiet --eval "addpath('model'); test_model; generate_vectors('build/matlab-vectors.txt');"
+	cmp model/fixtures/vectors.txt build/matlab-vectors.txt
 
 web-test:
 	$(NODE) --test tests/search.test.mjs

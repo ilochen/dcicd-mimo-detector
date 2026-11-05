@@ -44,10 +44,14 @@ An observation accepted at edge **n** yields one `o_valid` result immediately af
 ## Audit and reproduction
 
 - `make characterize` runs the original noiseless identity-channel case on the repaired top. For `[3,-1,1,-3,3,-1]`, the expected and observed output is **0x792**. The bench fails on a wrong word or a wrong count of valid cycles.
-- `make stream-test` checks every valid and invalid clock. It covers all 4,096 noiseless identity-channel words, dense signed channels, noisy observations, ties, input extremes, bubbles, back-to-back vectors, channel replacement with data in flight, and reset during a partial reload. When present, `build/matlab-vectors.txt` adds the generated complex-channel and quantization cases.
+- `make stream-test` checks every valid and invalid clock. It covers all 4,096 noiseless identity-channel words, dense signed channels, noisy observations, ties, input extremes, bubbles, back-to-back vectors, channel replacement with data in flight, and reset during a partial reload. The MATLAB fixture adds 24 channel beats and 74 observations. Fresh checkouts use the checked-in `model/fixtures/vectors.txt`; `make model-test` regenerates it and checks for byte-for-byte agreement.
 - `make archive-test` separately builds the historical RTL and reproduces **0x781** on the identity case. The preserved source also has its original 60-case metric-unit regression.
 
 The original hand-expanded front end accumulated a signed residual and used an incorrect product in its second-layer metric. It also wrote beyond several declared observation-delay arrays and generated `o_valid` from a free-running counter. The corrected path uses the same absolute-residual recurrence at every row and pipelines each accepted observation explicitly.
+
+### Verified results
+
+In CI, GNU Octave executed the .m suite and generated the same 98 bus rows obtained independently using NumPy QR and a scalar search. The Verilator scoreboard matched **4,555 output words across 4,975 clocks**, including every expected invalid cycle. The browser reference passed six tests. MATLAB itself was unavailable for this run. These results establish functional agreement for the tested traffic and default formats. They do not measure physical timing, area or power.
 
 | Path | Contents |
 |---|---|
