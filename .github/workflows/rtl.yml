@@ -11,7 +11,10 @@ jobs:
       - name: Verify the Pages reference
         run: make web-test
       - name: Install GNU Octave
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends octave
+        timeout-minutes: 5
+        run: |
+          sudo apt-get -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=1 update
+          sudo apt-get -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=1 install -y --no-install-recommends octave
       - name: Run the MATLAB model and export RTL vectors
         run: make model-test && test -s build/matlab-vectors.txt
       - name: Check RTL against Python and MATLAB-generated decisions
