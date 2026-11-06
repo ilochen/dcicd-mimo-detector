@@ -1,5 +1,7 @@
 # DCICD · 3 × 3 16-QAM MIMO detector
 
+[![Validation](https://github.com/ilochen/dcicd-mimo-detector/actions/workflows/rtl.yml/badge.svg)](https://github.com/ilochen/dcicd-mimo-detector/actions/workflows/rtl.yml)
+
 A fixed-point SystemVerilog receiver accepts a QR-preprocessed channel and a stream of observations. It detects three complex 16-QAM symbols per observation by searching six real axes. [Interactive survivor-search walkthrough](https://ilochen.github.io/dcicd-mimo-detector/)
 
 ## Run the complete regression
@@ -61,3 +63,11 @@ In CI, GNU Octave executed the .m suite and generated the same 98 bus rows obtai
 | `tests/` | SystemVerilog benches, Python scoreboard and JavaScript model checks |
 | `constraints/interface.sdc` | Original design timing target |
 | `docs/` | Standalone GitHub Pages walkthrough and model guide |
+
+[Interactive architecture](https://ilochen.github.io/projects/dcicd-mimo-detector/)
+
+## Validation snapshot
+
+The RTL scoreboard matched 4,555 output decisions and all 4,975 valid/invalid cycles. CI also regenerates the MATLAB-compatible fixtures with GNU Octave.
+
+Rechecked on 6 November 2026. Simulation results establish the covered functional behavior; physical implementation measurements are identified separately in the documentation.
